@@ -8,4 +8,19 @@ class User < ApplicationRecord
 
   attr_accessor :code
 
+  validate :check_code, on: :create
+
+  after_create_commit :save_code
+
+  def check_code
+  	sc = SecretCode.find_by(code: self.code, user_id: nil)
+    unless sc.present?
+		errors.add(:code, "is not valid")
+    end
+  end
+
+  def save_code
+  	SecretCode.find_by(code: self.code).update(user_id: self.id)
+  end
+
 end
